@@ -23,7 +23,14 @@ data class EditorRoute(
     val activityId: Long = -1,
     val date: String = "",
     val taskId: Long = -1,
-    val habitId: Long = -1
+    val habitId: Long = -1,
+    val start: String = "",
+    val preset: String = ""
+)
+
+@Serializable
+data class TimetableRoute(
+    val date: String = ""
 )
 
 @Serializable
@@ -59,4 +66,9 @@ object EditorKind {
     const val ACTIVITY = "actividad"
     const val TASK = "tarea"
     const val HABIT = "habito"
+    const val CLASS = "clase"
+}
+
+object EditorPreset {
+    const val CLASS = "clase"
 }

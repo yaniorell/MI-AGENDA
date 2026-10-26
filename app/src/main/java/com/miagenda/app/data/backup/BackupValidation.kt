@@ -83,6 +83,9 @@ private fun UserPreferences.checked(): UserPreferences {
         is NameValidation.Ok -> result.value
         NameValidation.TooLong -> invalid()
     }
+    if (mascotProgress < 0) {
+        invalid()
+    }
     return copy(displayName = name, recoveredFromError = false)
 }
 

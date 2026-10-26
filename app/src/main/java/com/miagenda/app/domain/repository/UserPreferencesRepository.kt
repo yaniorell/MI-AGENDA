@@ -17,5 +17,9 @@ interface UserPreferencesRepository {
 
     suspend fun setVisibleSections(sections: Set<HomeSection>)
 
+    suspend fun setShowMascot(show: Boolean)
+
+    suspend fun rememberMascotProgress(live: Int)
+
     suspend fun restore(preferences: UserPreferences)
 }

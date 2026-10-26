@@ -16,6 +16,7 @@ import com.miagenda.app.domain.model.RecurrenceRule
 import com.miagenda.app.domain.repository.ActivityRepository
 import com.miagenda.app.domain.repository.CategoryRepository
 import com.miagenda.app.domain.time.parseDaysOfWeek
+import com.miagenda.app.ui.navigation.EditorPreset
 import com.miagenda.app.ui.navigation.EditorRoute
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -56,7 +57,8 @@ data class ActivityEditorUiState(
     val intervalError: Boolean = false,
     val endDateError: Boolean = false,
     val saveError: Boolean = false,
-    val missing: Boolean = false
+    val missing: Boolean = false,
+    val isClass: Boolean = false
 )
 
 class ActivityEditorViewModel(
@@ -66,9 +68,8 @@ class ActivityEditorViewModel(
 ) : ViewModel() {
     private val route = savedStateHandle.toRoute<EditorRoute>()
     private val activityId = route.activityId
-    private val stateInternal = MutableStateFlow(
-        ActivityEditorUiState(dateText = initialDate(route.date))
-    )
+    private var categoryChosen = false
+    private val stateInternal = MutableStateFlow(newActivityState(route))
     val uiState: StateFlow<ActivityEditorUiState> = stateInternal.asStateFlow()
     private val savedInternal = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val saved: SharedFlow<Unit> = savedInternal.asSharedFlow()
@@ -76,7 +77,20 @@ class ActivityEditorViewModel(
     init {
         viewModelScope.launch {
             categoryRepository.observeAll().collect { categories ->
-                stateInternal.update { it.copy(categories = categories.filter { category -> !category.isArchived }) }
+                val visible = categories.filter { category -> !category.isArchived }
+                stateInternal.update { current ->
+                    val university = visible.firstOrNull { category -> category.isUniversity() }
+                    if (
+                        current.isClass &&
+                        !categoryChosen &&
+                        current.categoryId == null &&
+                        university != null
+                    ) {
+                        current.copy(categories = visible, categoryId = university.id)
+                    } else {
+                        current.copy(categories = visible)
+                    }
+                }
             }
         }
         if (activityId >= 0) {
@@ -89,7 +103,10 @@ class ActivityEditorViewModel(
     fun onDateChange(value: String) = update { it.copy(dateText = value, dateError = false, endDateError = false) }
     fun onStartChange(value: String) = update { it.copy(startText = value, timeError = false) }
     fun onEndChange(value: String) = update { it.copy(endText = value, timeError = false) }
-    fun onCategoryChange(id: Long?) = update { it.copy(categoryId = id) }
+    fun onCategoryChange(id: Long?) {
+        categoryChosen = true
+        update { it.copy(categoryId = id) }
+    }
     fun onRepeatChange(choice: RepeatChoice) = update { current ->
         val days = if (choice == RepeatChoice.EVERY_N_WEEKS && current.selectedDays.isEmpty()) {
             parseAgendaDate(current.dateText)?.dayOfWeek?.value?.let(::setOf) ?: current.selectedDays
@@ -252,8 +269,35 @@ class ActivityEditorViewModel(
     private fun update(transform: (ActivityEditorUiState) -> ActivityEditorUiState) {
         stateInternal.update(transform)
     }
+}
 
-    private fun initialDate(raw: String): String {
-        return parseAgendaDate(raw)?.toString() ?: LocalDate.now().toString()
+private fun newActivityState(route: EditorRoute): ActivityEditorUiState {
+    val date = parseAgendaDate(route.date)?.toString() ?: LocalDate.now().toString()
+    val isClass = route.activityId < 0 && route.preset == EditorPreset.CLASS
+    val start = parseClock(route.start)
+    val weekday = parseAgendaDate(date)?.dayOfWeek?.value
+    if (!isClass && (route.activityId >= 0 || start == null)) {
+        return ActivityEditorUiState(dateText = date)
     }
+    if (start == null) {
+        return ActivityEditorUiState(
+            dateText = date,
+            repeat = RepeatChoice.SPECIFIC_DAYS,
+            selectedDays = weekday?.let(::setOf) ?: emptySet(),
+            isClass = true
+        )
+    }
+    val end = if (start.hour >= 23) LocalTime.of(23, 59) else start.plusHours(1)
+    return ActivityEditorUiState(
+        dateText = date,
+        startText = formatClock(start),
+        endText = formatClock(end),
+        repeat = RepeatChoice.SPECIFIC_DAYS,
+        selectedDays = weekday?.let(::setOf) ?: emptySet(),
+        isClass = isClass
+    )
+}
+
+private fun Category.isUniversity(): Boolean {
+    return iconKey == "school" || name.equals("Universidad", ignoreCase = true)
 }

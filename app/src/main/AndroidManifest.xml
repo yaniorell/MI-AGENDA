@@ -2,6 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!--
+        Mi Agenda no pide permisos. No usa internet, ubicación, contactos,
+        cámara ni almacenamiento general. Exportar y restaurar la copia
+        usa el selector de archivos del teléfono.
+    -->
+
     <application
         android:name=".MiAgendaApplication"
         android:allowBackup="true"

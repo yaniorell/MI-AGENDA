@@ -50,6 +50,7 @@ fun CalendarScreen(
     viewModel: CalendarViewModel,
     onOpenActivity: (Long, String) -> Unit,
     onAddActivity: (String) -> Unit,
+    onOpenTimetable: (String) -> Unit,
     onOpenCategories: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -113,20 +114,35 @@ fun CalendarScreen(
                         .padding(horizontal = 4.dp, vertical = 6.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    val dayText = if (day.isSelected) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    }
+                    val weekdayText = if (day.isSelected) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
                     Text(
                         text = stringResource(weekdayShortRes(index)),
-                        style = MaterialTheme.typography.labelMedium
+                        style = MaterialTheme.typography.labelMedium,
+                        color = weekdayText
                     )
-                    Text(text = day.date.dayOfMonth.toString(), style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = day.date.dayOfMonth.toString(),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = dayText
+                    )
                     Box(
                         modifier = Modifier
                             .size(6.dp)
                             .clip(CircleShape)
                             .background(
-                                if (day.hasItems) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.surface.copy(alpha = 0f)
+                                when {
+                                    !day.hasItems -> MaterialTheme.colorScheme.surface.copy(alpha = 0f)
+                                    day.isSelected -> MaterialTheme.colorScheme.onPrimaryContainer
+                                    else -> MaterialTheme.colorScheme.primary
                                 }
                             )
                     )
@@ -138,6 +154,12 @@ fun CalendarScreen(
             modifier = Modifier.heightIn(min = 48.dp)
         ) {
             Text(stringResource(R.string.calendar_add_day))
+        }
+        TextButton(
+            onClick = { onOpenTimetable(state.selectedDate.toString()) },
+            modifier = Modifier.heightIn(min = 48.dp)
+        ) {
+            Text(stringResource(R.string.timetable_open))
         }
         TextButton(onClick = onOpenCategories, modifier = Modifier.heightIn(min = 48.dp)) {
             Text(stringResource(R.string.calendar_categories))

@@ -65,7 +65,11 @@ fun ActivityEditorScreen(
         }
         Text(
             text = stringResource(
-                if (state.isSeries) R.string.editor_edit_activity else R.string.editor_activity_title
+                when {
+                    state.isClass -> R.string.editor_class_title
+                    state.isSeries -> R.string.editor_edit_activity
+                    else -> R.string.editor_activity_title
+                }
             ),
             style = MaterialTheme.typography.displaySmall,
             modifier = Modifier
@@ -79,6 +83,14 @@ fun ActivityEditorScreen(
             )
             return@Column
         }
+        if (state.isClass) {
+            Text(
+                text = stringResource(R.string.editor_class_note),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
+        }
         if (state.isSeries) {
             Text(
                 text = stringResource(R.string.editor_series_note),
@@ -90,9 +102,17 @@ fun ActivityEditorScreen(
         OutlinedTextField(
             value = state.title,
             onValueChange = onTitleChange,
-            label = { Text(stringResource(R.string.field_title)) },
+            label = {
+                Text(stringResource(if (state.isClass) R.string.field_subject else R.string.field_title))
+            },
             supportingText = if (state.titleError) {
-                { Text(stringResource(R.string.error_title)) }
+                {
+                    Text(
+                        stringResource(
+                            if (state.isClass) R.string.error_subject else R.string.error_title
+                        )
+                    )
+                }
             } else {
                 null
             },
@@ -144,7 +164,9 @@ fun ActivityEditorScreen(
         OutlinedTextField(
             value = state.notes,
             onValueChange = onNotesChange,
-            label = { Text(stringResource(R.string.field_notes)) },
+            label = {
+                Text(stringResource(if (state.isClass) R.string.field_classroom else R.string.field_notes))
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
@@ -262,7 +284,7 @@ fun ActivityEditorScreen(
                 .padding(horizontal = 8.dp)
                 .heightIn(min = 48.dp)
         ) {
-            Text(stringResource(R.string.editor_save))
+            Text(stringResource(if (state.isClass) R.string.editor_save_class else R.string.editor_save))
         }
     }
 }

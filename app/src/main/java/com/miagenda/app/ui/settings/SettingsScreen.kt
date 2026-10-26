@@ -55,6 +55,7 @@ fun SettingsScreen(
     onSaveName: (String) -> Unit,
     onThemeSelected: (ThemeMode) -> Unit,
     onAccentSelected: (AccentColor) -> Unit,
+    onShowMascotChange: (Boolean) -> Unit,
     onSectionVisibleChange: (HomeSection, Boolean) -> Unit,
     modifier: Modifier = Modifier,
     footer: @Composable () -> Unit = {}
@@ -128,6 +129,11 @@ fun SettingsScreen(
             text = stringResource(R.string.settings_theme_title),
             style = MaterialTheme.typography.titleMedium
         )
+        Text(
+            text = stringResource(R.string.settings_theme_support),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
         Row(
             modifier = Modifier.horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -166,6 +172,20 @@ fun SettingsScreen(
                 onClick = { onAccentSelected(accent) }
             )
         }
+        Text(
+            text = stringResource(R.string.settings_mascot_title),
+            style = MaterialTheme.typography.titleMedium
+        )
+        Text(
+            text = stringResource(R.string.settings_mascot_support),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        SectionToggle(
+            label = stringResource(R.string.settings_mascot_show),
+            checked = state.showMascot,
+            onCheckedChange = onShowMascotChange
+        )
         Text(
             text = stringResource(R.string.settings_sections_title),
             style = MaterialTheme.typography.titleMedium

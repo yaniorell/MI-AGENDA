@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.School
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Spa
 import androidx.compose.material.icons.rounded.TaskAlt
@@ -51,6 +52,7 @@ import com.miagenda.app.ui.navigation.HabitsRoute
 import com.miagenda.app.ui.navigation.HomeRoute
 import com.miagenda.app.ui.navigation.SettingsRoute
 import com.miagenda.app.ui.navigation.TasksRoute
+import com.miagenda.app.ui.navigation.TimetableRoute
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 
@@ -61,6 +63,7 @@ enum class MainDestination(
 ) {
     HOME(R.string.nav_home, Icons.Rounded.Home, HomeRoute),
     CALENDAR(R.string.nav_calendar, Icons.Rounded.CalendarMonth, CalendarRoute),
+    TIMETABLE(R.string.nav_timetable, Icons.Rounded.School, TimetableRoute()),
     TASKS(R.string.nav_tasks, Icons.Rounded.TaskAlt, TasksRoute),
     HABITS(R.string.nav_habits, Icons.Rounded.Spa, HabitsRoute),
     SETTINGS(R.string.nav_settings, Icons.Rounded.Settings, SettingsRoute)
@@ -73,6 +76,7 @@ fun NavDestination?.isMainDestination(destination: MainDestination): Boolean {
     return when (destination) {
         MainDestination.HOME -> hasRoute<HomeRoute>()
         MainDestination.CALENDAR -> hasRoute<CalendarRoute>()
+        MainDestination.TIMETABLE -> hasRoute<TimetableRoute>()
         MainDestination.TASKS -> hasRoute<TasksRoute>()
         MainDestination.HABITS -> hasRoute<HabitsRoute>()
         MainDestination.SETTINGS -> hasRoute<SettingsRoute>()
@@ -109,7 +113,7 @@ fun BottomNavigationBar(
                         destinations = listOf(
                             MainDestination.HOME,
                             MainDestination.CALENDAR,
-                            MainDestination.TASKS
+                            MainDestination.TIMETABLE
                         ),
                         currentDestination = currentDestination,
                         onNavigate = onNavigate
@@ -117,6 +121,7 @@ fun BottomNavigationBar(
                     Spacer(modifier = Modifier.width(72.dp))
                     DestinationGroup(
                         destinations = listOf(
+                            MainDestination.TASKS,
                             MainDestination.HABITS,
                             MainDestination.SETTINGS
                         ),
@@ -159,8 +164,13 @@ private fun BarDestination(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tint = if (selected) {
+    val labelColor = if (selected) {
         MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    val iconTint = if (selected) {
+        MaterialTheme.colorScheme.onPrimaryContainer
     } else {
         MaterialTheme.colorScheme.onSurfaceVariant
     }
@@ -182,7 +192,7 @@ private fun BarDestination(
                 .clip(CircleShape)
                 .background(
                     if (selected) {
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
+                        MaterialTheme.colorScheme.primaryContainer
                     } else {
                         Color.Transparent
                     }
@@ -192,13 +202,13 @@ private fun BarDestination(
             Icon(
                 imageVector = destination.icon,
                 contentDescription = null,
-                tint = tint
+                tint = iconTint
             )
         }
         Text(
             text = stringResource(destination.labelRes),
             style = MaterialTheme.typography.labelSmall,
-            color = tint,
+            color = labelColor,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )

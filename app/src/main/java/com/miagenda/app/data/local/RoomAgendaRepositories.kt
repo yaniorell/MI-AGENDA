@@ -121,6 +121,12 @@ class RoomActivityRepository(
         }
     }
 
+    override fun observeAllOverrides(): Flow<List<ActivityOverride>> {
+        return activityDao.observeAllOverrides().map { overrides ->
+            overrides.map { it.toDomain() }
+        }
+    }
+
     override suspend fun insertRule(rule: RecurrenceRule): RecurrenceRule {
         val prepared = prepareRule(rule)
         val now = timeProvider.now()

@@ -29,6 +29,8 @@ import com.miagenda.app.ui.activity.ActivityEditorScreen
 import com.miagenda.app.ui.activity.ActivityEditorViewModel
 import com.miagenda.app.ui.calendar.CalendarScreen
 import com.miagenda.app.ui.calendar.CalendarViewModel
+import com.miagenda.app.ui.calendar.TimetableScreen
+import com.miagenda.app.ui.calendar.TimetableViewModel
 import com.miagenda.app.ui.category.CategoryManagerScreen
 import com.miagenda.app.ui.category.CategoryManagerViewModel
 import com.miagenda.app.ui.components.AgendaScaffold
@@ -43,6 +45,8 @@ import com.miagenda.app.ui.habit.HabitsScreen
 import com.miagenda.app.ui.habit.HabitsViewModel
 import com.miagenda.app.ui.home.HomeScreen
 import com.miagenda.app.ui.home.HomeViewModel
+import com.miagenda.app.ui.mascot.LocalMascot
+import com.miagenda.app.ui.mascot.MascotViewModel
 import com.miagenda.app.ui.reflection.ReflectionScreen
 import com.miagenda.app.ui.reflection.ReflectionViewModel
 import com.miagenda.app.ui.reflection.WeekSummaryScreen
@@ -58,6 +62,7 @@ import com.miagenda.app.ui.navigation.AddKindSheet
 import com.miagenda.app.ui.navigation.CalendarRoute
 import com.miagenda.app.ui.navigation.CategoriesRoute
 import com.miagenda.app.ui.navigation.EditorKind
+import com.miagenda.app.ui.navigation.EditorPreset
 import com.miagenda.app.ui.navigation.EditorRoute
 import com.miagenda.app.ui.navigation.HabitDetailRoute
 import com.miagenda.app.ui.navigation.HabitsRoute
@@ -66,6 +71,7 @@ import com.miagenda.app.ui.navigation.ReflectionRoute
 import com.miagenda.app.ui.navigation.WeekSummaryRoute
 import com.miagenda.app.ui.navigation.SettingsRoute
 import com.miagenda.app.ui.navigation.TaskDetailRoute
+import com.miagenda.app.ui.navigation.TimetableRoute
 import com.miagenda.app.ui.navigation.TasksRoute
 import com.miagenda.app.ui.settings.SettingsScreen
 import com.miagenda.app.ui.settings.SettingsViewModel
@@ -83,6 +89,9 @@ fun MiAgendaApp(factory: ViewModelProvider.Factory) {
     val destination = backStackEntry?.destination
 
     CompositionLocalProvider(LocalViewModelFactory provides factory) {
+        val mascotViewModel: MascotViewModel = viewModel(factory = factory)
+        val mascot by mascotViewModel.uiState.collectAsStateWithLifecycle()
+        CompositionLocalProvider(LocalMascot provides mascot) {
         AgendaScaffold(
             currentDestination = destination,
             showBottomBar = destination.showsBottomBar(),
@@ -122,6 +131,23 @@ fun MiAgendaApp(factory: ViewModelProvider.Factory) {
                                 launchSingleTop = true
                             }
                         },
+                        onOpenTimetable = {
+                            navController.navigate(TimetableRoute()) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        onAddClass = {
+                            navController.navigate(
+                                EditorRoute(
+                                    kind = EditorKind.ACTIVITY,
+                                    preset = EditorPreset.CLASS
+                                )
+                            )
+                        },
                         onOpenTasks = {
                             navController.navigate(TasksRoute) {
                                 launchSingleTop = true
@@ -156,7 +182,51 @@ fun MiAgendaApp(factory: ViewModelProvider.Factory) {
                                 EditorRoute(kind = EditorKind.ACTIVITY, date = date)
                             )
                         },
+                        onOpenTimetable = { date ->
+                            navController.navigate(TimetableRoute(date = date))
+                        },
                         onOpenCategories = { navController.navigate(CategoriesRoute) }
+                    )
+                }
+                composable<TimetableRoute> {
+                    val viewModel: TimetableViewModel = viewModel(factory = LocalViewModelFactory.current)
+                    val state by viewModel.uiState.collectAsStateWithLifecycle()
+                    TimetableScreen(
+                        state = state,
+                        onPreviousWeek = viewModel::showPreviousWeek,
+                        onNextWeek = viewModel::showNextWeek,
+                        onToday = viewModel::showToday,
+                        onOpenActivity = { activityId, date ->
+                            navController.navigate(ActivityDetailRoute(activityId, date))
+                        },
+                        onAddActivity = { date, start ->
+                            navController.navigate(
+                                EditorRoute(
+                                    kind = EditorKind.ACTIVITY,
+                                    date = date,
+                                    start = start,
+                                    preset = EditorPreset.CLASS
+                                )
+                            )
+                        },
+                        onAddClass = {
+                            val date = if (
+                                !state.today.isBefore(state.weekStart) &&
+                                !state.today.isAfter(state.weekStart.plusDays(6))
+                            ) {
+                                state.today
+                            } else {
+                                state.weekStart
+                            }
+                            navController.navigate(
+                                EditorRoute(
+                                    kind = EditorKind.ACTIVITY,
+                                    date = date.toString(),
+                                    preset = EditorPreset.CLASS
+                                )
+                            )
+                        },
+                        onBack = { navController.popBackStack() }
                     )
                 }
                 composable<CategoriesRoute> {
@@ -287,6 +357,7 @@ fun MiAgendaApp(factory: ViewModelProvider.Factory) {
                         onSaveName = viewModel::saveDisplayName,
                         onThemeSelected = viewModel::setTheme,
                         onAccentSelected = viewModel::setAccent,
+                        onShowMascotChange = viewModel::setShowMascot,
                         onSectionVisibleChange = viewModel::setSectionVisible,
                         footer = { BackupSection() }
                     )
@@ -368,9 +439,19 @@ fun MiAgendaApp(factory: ViewModelProvider.Factory) {
                 onDismiss = { showAddSheet = false },
                 onPick = { kind ->
                     showAddSheet = false
-                    navController.navigate(EditorRoute(kind))
+                    if (kind == EditorKind.CLASS) {
+                        navController.navigate(
+                            EditorRoute(
+                                kind = EditorKind.ACTIVITY,
+                                preset = EditorPreset.CLASS
+                            )
+                        )
+                    } else {
+                        navController.navigate(EditorRoute(kind))
+                    }
                 }
             )
+        }
         }
     }
 }

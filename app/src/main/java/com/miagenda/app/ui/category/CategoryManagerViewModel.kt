@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.miagenda.app.domain.model.Category
 import com.miagenda.app.domain.repository.CategoryRepository
 import java.time.LocalDateTime
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +16,8 @@ data class CategoryManagerUiState(
     val categories: List<Category> = emptyList(),
     val name: String = "",
     val colorArgb: Int = categoryPalette.first(),
-    val nameError: Boolean = false
+    val nameError: Boolean = false,
+    val saveFailed: Boolean = false
 )
 
 val categoryPalette: List<Int> = listOf(
@@ -45,7 +47,7 @@ class CategoryManagerViewModel(
     }
 
     fun onNameChange(value: String) {
-        stateInternal.update { it.copy(name = value, nameError = false) }
+        stateInternal.update { it.copy(name = value, nameError = false, saveFailed = false) }
     }
 
     fun onColorChange(colorArgb: Int) {
@@ -58,22 +60,38 @@ class CategoryManagerViewModel(
             stateInternal.update { it.copy(nameError = true) }
             return
         }
+        val nameToSave = current.name
+        val colorToSave = current.colorArgb
         viewModelScope.launch {
-            val stamp = LocalDateTime.now()
-            val nextOrder = (current.categories.maxOfOrNull { it.sortOrder } ?: -1) + 1
-            categoryRepository.insert(
-                Category(
-                    id = 0,
-                    name = current.name,
-                    colorArgb = current.colorArgb,
-                    iconKey = "label",
-                    sortOrder = nextOrder,
-                    isArchived = false,
-                    createdAt = stamp,
-                    updatedAt = stamp
+            try {
+                val stamp = LocalDateTime.now()
+                val nextOrder = (stateInternal.value.categories.maxOfOrNull { it.sortOrder } ?: -1) + 1
+                categoryRepository.insert(
+                    Category(
+                        id = 0,
+                        name = nameToSave,
+                        colorArgb = colorToSave,
+                        iconKey = "label",
+                        sortOrder = nextOrder,
+                        isArchived = false,
+                        createdAt = stamp,
+                        updatedAt = stamp
+                    )
                 )
-            )
-            stateInternal.update { it.copy(name = "") }
+                stateInternal.update { latest ->
+                    if (latest.name == nameToSave) {
+                        latest.copy(name = "", nameError = false, saveFailed = false)
+                    } else {
+                        latest.copy(saveFailed = false)
+                    }
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                stateInternal.update { latest ->
+                    latest.copy(saveFailed = true)
+                }
+            }
         }
     }
 

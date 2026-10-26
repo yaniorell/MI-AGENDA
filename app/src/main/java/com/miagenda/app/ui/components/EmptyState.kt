@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.miagenda.app.ui.mascot.LocalMascot
+import com.miagenda.app.ui.mascot.MascotCat
 
 @Composable
 fun EmptyState(
@@ -28,25 +30,31 @@ fun EmptyState(
     containerColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
     messageColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    iconTint: Color = MaterialTheme.colorScheme.primary
+    iconTint: Color = MaterialTheme.colorScheme.primary,
+    allowMascot: Boolean = true
 ) {
+    val mascot = LocalMascot.current
     RoundedCard(
         modifier = modifier,
         containerColor = containerColor,
         contentColor = contentColor
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(iconTint.copy(alpha = 0.18f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = iconTint
-                )
+            if (allowMascot && mascot.visible) {
+                MascotCat(stage = mascot.stage, modifier = Modifier.size(56.dp))
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(iconTint.copy(alpha = 0.18f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = iconTint
+                    )
+                }
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {

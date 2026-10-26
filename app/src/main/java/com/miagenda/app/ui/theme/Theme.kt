@@ -5,6 +5,8 @@ import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -87,6 +89,7 @@ private val DarkColorScheme = darkColorScheme(
     surfaceVariant = SurfaceNightRaised,
     onSurfaceVariant = TextMuted,
     outline = OutlineNight,
+    outlineVariant = OutlineNight,
     error = Color(0xFFFFB4AB),
     onError = Color(0xFF690005)
 )
@@ -107,6 +110,7 @@ private val LightColorScheme = lightColorScheme(
     surfaceVariant = Cream,
     onSurfaceVariant = MutedDay,
     outline = OutlineDay,
+    outlineVariant = OutlineDay,
     error = Color(0xFFBA1A1A),
     onError = Color.White
 )
@@ -138,12 +142,7 @@ fun MiAgendaTheme(
         onAccent = palette.onPrimary,
         accentDeep = palette.deep
     )
-    val colorScheme = (if (darkTheme) DarkColorScheme else LightColorScheme).copy(
-        primary = palette.primary,
-        onPrimary = palette.onPrimary,
-        primaryContainer = palette.container,
-        onPrimaryContainer = palette.onContainer
-    )
+    val colorScheme = miAgendaColorScheme(darkTheme, accentColor)
     CompositionLocalProvider(
         LocalMiAgendaColors provides extraColors,
         LocalReduceMotion provides reduceMotion
@@ -155,6 +154,22 @@ fun MiAgendaTheme(
             content = content
         )
     }
+}
+
+internal fun miAgendaColorScheme(darkTheme: Boolean, accentColor: AccentColor): ColorScheme {
+    val palette = accentColor.palette(darkTheme)
+    return (if (darkTheme) DarkColorScheme else LightColorScheme).copy(
+        primary = palette.primary,
+        onPrimary = palette.onPrimary,
+        primaryContainer = palette.container,
+        onPrimaryContainer = palette.onContainer,
+        secondaryContainer = palette.container,
+        onSecondaryContainer = palette.onContainer,
+        tertiary = palette.primary,
+        onTertiary = palette.onPrimary,
+        tertiaryContainer = palette.container,
+        onTertiaryContainer = palette.onContainer
+    )
 }
 
 @Composable
@@ -177,16 +192,18 @@ fun GradientBackground(
     content: @Composable BoxScope.() -> Unit
 ) {
     val colors = LocalMiAgendaColors.current
-    Box(
-        modifier = modifier.background(
-            Brush.verticalGradient(
-                colors = listOf(
-                    colors.gradientTop,
-                    colors.gradientMiddle,
-                    colors.gradientBottom
+    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onBackground) {
+        Box(
+            modifier = modifier.background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        colors.gradientTop,
+                        colors.gradientMiddle,
+                        colors.gradientBottom
+                    )
                 )
-            )
-        ),
-        content = content
-    )
+            ),
+            content = content
+        )
+    }
 }

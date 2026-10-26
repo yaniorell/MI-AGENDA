@@ -15,6 +15,8 @@ data class AgendaItem(
     val date: LocalDate,
     val title: String,
     val timeLabel: String,
+    val startTime: LocalTime,
+    val endTime: LocalTime,
     val status: ActivityStatus,
     val categoryName: String?,
     val colorArgb: Int?
@@ -31,6 +33,8 @@ fun ActivityOccurrence.toAgendaItem(categories: List<Category>): AgendaItem {
         date = date,
         title = activity.title,
         timeLabel = "${formatClock(startTime)} – ${formatClock(endTime)}",
+        startTime = startTime,
+        endTime = endTime,
         status = status,
         categoryName = category?.name,
         colorArgb = category?.colorArgb

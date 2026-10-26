@@ -17,12 +17,15 @@ import com.miagenda.app.domain.usecase.ImportBackup
 import com.miagenda.app.domain.usecase.ObserveUserPreferences
 import com.miagenda.app.domain.usecase.UpdateAccentColor
 import com.miagenda.app.domain.usecase.UpdateDisplayName
+import com.miagenda.app.domain.usecase.RememberMascotProgress
 import com.miagenda.app.domain.usecase.UpdateHomeSections
+import com.miagenda.app.domain.usecase.UpdateShowMascot
 import com.miagenda.app.domain.usecase.UpdateThemeMode
 import com.miagenda.app.ui.backup.BackupViewModel
 import com.miagenda.app.ui.activity.ActivityDetailViewModel
 import com.miagenda.app.ui.activity.ActivityEditorViewModel
 import com.miagenda.app.ui.calendar.CalendarViewModel
+import com.miagenda.app.ui.calendar.TimetableViewModel
 import com.miagenda.app.ui.category.CategoryManagerViewModel
 import com.miagenda.app.ui.habit.HabitDetailViewModel
 import com.miagenda.app.ui.habit.HabitEditorViewModel
@@ -33,6 +36,7 @@ import com.miagenda.app.ui.reflection.WeekSummaryViewModel
 import com.miagenda.app.ui.task.TaskDetailViewModel
 import com.miagenda.app.ui.task.TaskEditorViewModel
 import com.miagenda.app.ui.task.TasksViewModel
+import com.miagenda.app.ui.mascot.MascotViewModel
 import com.miagenda.app.ui.settings.SettingsViewModel
 import com.miagenda.app.ui.theme.AppViewModel
 import java.time.LocalDate
@@ -43,6 +47,8 @@ class MiAgendaViewModelFactory(
     private val updateThemeMode: UpdateThemeMode,
     private val updateAccentColor: UpdateAccentColor,
     private val updateHomeSections: UpdateHomeSections,
+    private val updateShowMascot: UpdateShowMascot,
+    private val rememberMascotProgress: RememberMascotProgress,
     private val activityRepository: ActivityRepository,
     private val categoryRepository: CategoryRepository,
     private val taskRepository: TaskRepository,
@@ -76,13 +82,29 @@ class MiAgendaViewModelFactory(
                     updateDisplayName = updateDisplayName,
                     updateThemeMode = updateThemeMode,
                     updateAccentColor = updateAccentColor,
-                    updateHomeSections = updateHomeSections
+                    updateHomeSections = updateHomeSections,
+                    updateShowMascot = updateShowMascot
+                )
+            modelClass.isAssignableFrom(MascotViewModel::class.java) ->
+                MascotViewModel(
+                    observeUserPreferences = observeUserPreferences,
+                    activityRepository = activityRepository,
+                    taskRepository = taskRepository,
+                    habitRepository = habitRepository,
+                    rememberMascotProgress = rememberMascotProgress
                 )
             modelClass.isAssignableFrom(BackupViewModel::class.java) ->
                 BackupViewModel(
                     exportBackup = exportBackup,
                     importBackup = importBackup,
                     backupFiles = backupFiles,
+                    dateProvider = dateProvider
+                )
+            modelClass.isAssignableFrom(TimetableViewModel::class.java) ->
+                TimetableViewModel(
+                    savedStateHandle = extras.createSavedStateHandle(),
+                    activityRepository = activityRepository,
+                    categoryRepository = categoryRepository,
                     dateProvider = dateProvider
                 )
             modelClass.isAssignableFrom(CalendarViewModel::class.java) ->

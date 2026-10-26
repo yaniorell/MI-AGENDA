@@ -42,7 +42,9 @@ internal data class BackupPreferencesDto(
     val displayName: String,
     val themeMode: String,
     val accentColor: String,
-    val homeSections: List<String>
+    val homeSections: List<String>,
+    val showMascot: Boolean = true,
+    val mascotProgress: Int = 0
 )
 
 @Serializable
@@ -152,7 +154,9 @@ internal fun BackupContents.toDocument(): BackupDocument {
             accentColor = preferences.accentColor.name,
             homeSections = HomeSection.entries
                 .filter { section -> section in preferences.visibleSections }
-                .map { section -> section.name }
+                .map { section -> section.name },
+            showMascot = preferences.showMascot,
+            mascotProgress = preferences.mascotProgress
         ),
         categories = snapshot.categories.map { category ->
             BackupCategoryDto(
@@ -265,6 +269,8 @@ internal fun BackupDocument.toContents(): BackupContents {
             themeMode = preferences.themeMode.toEnum(),
             accentColor = preferences.accentColor.toEnum(),
             visibleSections = sections.toSet(),
+            showMascot = preferences.showMascot,
+            mascotProgress = preferences.mascotProgress,
             recoveredFromError = false
         ),
         snapshot = AgendaSnapshot(

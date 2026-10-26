@@ -3,8 +3,10 @@ package com.miagenda.app.data.preferences
 import android.content.Context
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.miagenda.app.domain.model.AccentColor
@@ -68,12 +70,32 @@ class DataStoreUserPreferencesRepository(
         }
     }
 
+    override suspend fun setShowMascot(show: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[Keys.showMascot] = show
+        }
+    }
+
+    override suspend fun rememberMascotProgress(live: Int) {
+        if (live <= 0) {
+            return
+        }
+        dataStore.edit { preferences ->
+            val stored = preferences[Keys.mascotProgress] ?: 0
+            if (live > stored) {
+                preferences[Keys.mascotProgress] = live
+            }
+        }
+    }
+
     override suspend fun restore(preferences: UserPreferences) {
         dataStore.edit { stored ->
             stored[Keys.displayName] = preferences.displayName
             stored[Keys.themeMode] = preferences.themeMode.name
             stored[Keys.accentColor] = preferences.accentColor.name
             stored[Keys.homeSections] = HomeSection.toStorage(preferences.visibleSections)
+            stored[Keys.showMascot] = preferences.showMascot
+            stored[Keys.mascotProgress] = preferences.mascotProgress.coerceAtLeast(0)
         }
     }
 
@@ -83,6 +105,8 @@ class DataStoreUserPreferencesRepository(
             themeMode = ThemeMode.fromStorage(this[Keys.themeMode]),
             accentColor = AccentColor.fromStorage(this[Keys.accentColor]),
             visibleSections = HomeSection.fromStorage(this[Keys.homeSections]),
+            showMascot = this[Keys.showMascot] ?: true,
+            mascotProgress = (this[Keys.mascotProgress] ?: 0).coerceAtLeast(0),
             recoveredFromError = recovered
         )
     }
@@ -92,5 +116,7 @@ class DataStoreUserPreferencesRepository(
         val themeMode = stringPreferencesKey("theme_mode")
         val accentColor = stringPreferencesKey("accent_color")
         val homeSections = stringPreferencesKey("home_sections")
+        val showMascot = booleanPreferencesKey("show_mascot")
+        val mascotProgress = intPreferencesKey("mascot_progress")
     }
 }

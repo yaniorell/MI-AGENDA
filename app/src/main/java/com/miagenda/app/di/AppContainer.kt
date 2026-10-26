@@ -17,7 +17,9 @@ import com.miagenda.app.domain.usecase.ImportBackup
 import com.miagenda.app.domain.usecase.ObserveUserPreferences
 import com.miagenda.app.domain.usecase.UpdateAccentColor
 import com.miagenda.app.domain.usecase.UpdateDisplayName
+import com.miagenda.app.domain.usecase.RememberMascotProgress
 import com.miagenda.app.domain.usecase.UpdateHomeSections
+import com.miagenda.app.domain.usecase.UpdateShowMascot
 import com.miagenda.app.domain.usecase.UpdateThemeMode
 import java.time.LocalDateTime
 import kotlinx.coroutines.CoroutineScope
@@ -59,6 +61,8 @@ class AppContainer(
     val updateThemeMode = UpdateThemeMode(preferencesRepository)
     val updateAccentColor = UpdateAccentColor(preferencesRepository)
     val updateHomeSections = UpdateHomeSections(preferencesRepository)
+    val updateShowMascot = UpdateShowMascot(preferencesRepository)
+    val rememberMascotProgress = RememberMascotProgress(preferencesRepository)
 
     init {
         appScope.launch {
@@ -73,6 +77,8 @@ class AppContainer(
             updateThemeMode = updateThemeMode,
             updateAccentColor = updateAccentColor,
             updateHomeSections = updateHomeSections,
+            updateShowMascot = updateShowMascot,
+            rememberMascotProgress = rememberMascotProgress,
             activityRepository = activityRepository,
             categoryRepository = categoryRepository,
             taskRepository = taskRepository,

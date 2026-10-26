@@ -10,6 +10,7 @@ import com.miagenda.app.domain.usecase.ObserveUserPreferences
 import com.miagenda.app.domain.usecase.UpdateAccentColor
 import com.miagenda.app.domain.usecase.UpdateDisplayName
 import com.miagenda.app.domain.usecase.UpdateHomeSections
+import com.miagenda.app.domain.usecase.UpdateShowMascot
 import com.miagenda.app.domain.usecase.UpdateThemeMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,7 +26,8 @@ class SettingsViewModel(
     private val updateDisplayName: UpdateDisplayName,
     private val updateThemeMode: UpdateThemeMode,
     private val updateAccentColor: UpdateAccentColor,
-    private val updateHomeSections: UpdateHomeSections
+    private val updateHomeSections: UpdateHomeSections,
+    private val updateShowMascot: UpdateShowMascot
 ) : ViewModel() {
 
     private val feedback = MutableStateFlow(SettingsFeedback())
@@ -41,6 +43,7 @@ class SettingsViewModel(
             themeMode = preferences.themeMode,
             accentColor = preferences.accentColor,
             visibleSections = preferences.visibleSections,
+            showMascot = preferences.showMascot,
             nameError = currentFeedback.nameError,
             saveFailed = currentFeedback.saveFailed,
             showSaved = currentFeedback.showSaved,
@@ -89,6 +92,16 @@ class SettingsViewModel(
         viewModelScope.launch {
             try {
                 updateAccentColor(color)
+            } catch (_: IOException) {
+                feedback.update { current -> current.copy(saveFailed = true, showSaved = false) }
+            }
+        }
+    }
+
+    fun setShowMascot(show: Boolean) {
+        viewModelScope.launch {
+            try {
+                updateShowMascot(show)
             } catch (_: IOException) {
                 feedback.update { current -> current.copy(saveFailed = true, showSaved = false) }
             }

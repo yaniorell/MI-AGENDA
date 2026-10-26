@@ -1,6 +1,7 @@
 package com.miagenda.app.ui.components
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -24,6 +25,7 @@ fun AgendaScaffold(
 ) {
     Scaffold(
         containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.onBackground,
         bottomBar = {
             if (showBottomBar) {
                 BottomNavigationBar(

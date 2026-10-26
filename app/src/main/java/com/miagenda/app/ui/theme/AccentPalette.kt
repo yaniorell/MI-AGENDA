@@ -35,7 +35,7 @@ fun AccentColor.palette(darkTheme: Boolean): AccentPalette {
                 primary = Teal,
                 onPrimary = Color(0xFF062830),
                 container = TealDay,
-                onContainer = Color(0xFFE5F6F8),
+                onContainer = Color.White,
                 deep = TealDay
             )
         } else {

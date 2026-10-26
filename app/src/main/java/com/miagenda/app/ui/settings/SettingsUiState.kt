@@ -14,6 +14,7 @@ data class SettingsUiState(
     val themeMode: ThemeMode = ThemeMode.DARK,
     val accentColor: AccentColor = AccentColor.CORAL,
     val visibleSections: Set<HomeSection> = HomeSection.entries.toSet(),
+    val showMascot: Boolean = true,
     val nameError: NameFieldError = NameFieldError.None,
     val saveFailed: Boolean = false,
     val showSaved: Boolean = false,

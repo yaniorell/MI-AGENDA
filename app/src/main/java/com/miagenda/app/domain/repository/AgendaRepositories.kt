@@ -31,6 +31,8 @@ interface ActivityRepository {
     suspend fun delete(id: Long)
     fun observeRules(): Flow<List<RecurrenceRule>>
     fun observeOverridesBetween(start: LocalDate, end: LocalDate): Flow<List<ActivityOverride>>
+
+    fun observeAllOverrides(): Flow<List<ActivityOverride>>
     suspend fun insertRule(rule: RecurrenceRule): RecurrenceRule
     suspend fun getRule(id: Long): RecurrenceRule?
     suspend fun updateRule(rule: RecurrenceRule): RecurrenceRule

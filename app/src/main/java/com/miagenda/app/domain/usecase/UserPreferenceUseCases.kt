@@ -52,3 +52,19 @@ class UpdateHomeSections(
         repository.setVisibleSections(sections)
     }
 }
+
+class UpdateShowMascot(
+    private val repository: UserPreferencesRepository
+) {
+    suspend operator fun invoke(show: Boolean) {
+        repository.setShowMascot(show)
+    }
+}
+
+class RememberMascotProgress(
+    private val repository: UserPreferencesRepository
+) {
+    suspend operator fun invoke(live: Int) {
+        repository.rememberMascotProgress(live)
+    }
+}

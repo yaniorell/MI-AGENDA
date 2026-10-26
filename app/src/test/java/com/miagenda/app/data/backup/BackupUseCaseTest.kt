@@ -137,6 +137,10 @@ private class MemoryPreferences(
 
     override suspend fun setVisibleSections(sections: Set<HomeSection>) = Unit
 
+    override suspend fun setShowMascot(show: Boolean) = Unit
+
+    override suspend fun rememberMascotProgress(live: Int) = Unit
+
     override suspend fun restore(preferences: UserPreferences) {
         if (failOnRestore) {
             throw IOException("disk")

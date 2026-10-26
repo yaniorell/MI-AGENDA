@@ -98,6 +98,9 @@ interface ActivityDao {
     @Query("SELECT * FROM activity_overrides ORDER BY occurrence_date ASC, id ASC")
     suspend fun getAllOverrides(): List<ActivityOverrideEntity>
 
+    @Query("SELECT * FROM activity_overrides ORDER BY occurrence_date ASC, id ASC")
+    fun observeAllOverrides(): Flow<List<ActivityOverrideEntity>>
+
     @Query("DELETE FROM activity_overrides")
     suspend fun deleteAllOverrides()
 

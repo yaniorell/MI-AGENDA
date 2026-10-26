@@ -44,6 +44,33 @@ class BackupCodecTest {
     }
 
     @Test
+    fun laMascotaSeGuardaYUnaCopiaViejaLaDejaVisible() {
+        val original = sample().copy(
+            preferences = sample().preferences.copy(showMascot = false, mascotProgress = 24)
+        )
+        val decoded = JsonBackupCodec.decode(JsonBackupCodec.encode(original))
+        assertFalse(decoded.preferences.showMascot)
+        assertEquals(24, decoded.preferences.mascotProgress)
+        val legacy = JsonBackupCodec.encode(sample())
+            .replace(Regex(""",\s*"mascotProgress"\s*:\s*0"""), "")
+            .replace(Regex(""",\s*"showMascot"\s*:\s*true"""), "")
+        val fromLegacy = JsonBackupCodec.decode(legacy)
+        assertTrue(fromLegacy.preferences.showMascot)
+        assertEquals(0, fromLegacy.preferences.mascotProgress)
+    }
+
+    @Test
+    fun rechazaUnProgresoDeMascotaNegativo() {
+        val json = JsonBackupCodec.encode(
+            sample().copy(preferences = sample().preferences.copy(mascotProgress = 1))
+        ).replace("\"mascotProgress\": 1", "\"mascotProgress\": -1")
+        val error = assertThrows(BackupFormatException::class.java) {
+            JsonBackupCodec.decode(json)
+        }
+        assertEquals(BackupProblem.INVALID, error.problem)
+    }
+
+    @Test
     fun unaCopiaSinSeccionesNoLasActivaTodas() {
         val original = sample().copy(
             preferences = UserPreferences(visibleSections = emptySet())
@@ -123,6 +150,36 @@ class BackupCodecTest {
         val broken = json.replace("TEAL", "PURPLE")
         val error = assertThrows(BackupFormatException::class.java) {
             JsonBackupCodec.decode(broken)
+        }
+        assertEquals(BackupProblem.INVALID, error.problem)
+    }
+
+    @Test
+    fun rechazaUnTituloEnBlanco() {
+        val original = sample()
+        val activity = original.snapshot.activities.single()
+        val broken = original.copy(
+            snapshot = original.snapshot.copy(
+                activities = listOf(activity.copy(title = "   "))
+            )
+        )
+        val error = assertThrows(BackupFormatException::class.java) {
+            JsonBackupCodec.encode(broken)
+        }
+        assertEquals(BackupProblem.INVALID, error.problem)
+    }
+
+    @Test
+    fun rechazaDosRegistrosDelMismoHabitoYDia() {
+        val original = sample()
+        val log = original.snapshot.logs.single()
+        val broken = original.copy(
+            snapshot = original.snapshot.copy(
+                logs = listOf(log, log.copy(id = log.id + 1))
+            )
+        )
+        val error = assertThrows(BackupFormatException::class.java) {
+            JsonBackupCodec.encode(broken)
         }
         assertEquals(BackupProblem.INVALID, error.problem)
     }

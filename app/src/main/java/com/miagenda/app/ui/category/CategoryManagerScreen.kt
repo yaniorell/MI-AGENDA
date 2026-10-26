@@ -39,7 +39,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.miagenda.app.R
@@ -89,12 +92,16 @@ fun CategoryManagerScreen(
             value = state.name,
             onValueChange = onNameChange,
             label = { Text(stringResource(R.string.categories_name)) },
-            supportingText = if (state.nameError) {
-                { Text(stringResource(R.string.categories_empty_name)) }
-            } else {
-                null
+            supportingText = when {
+                state.nameError -> {
+                    { Text(stringResource(R.string.categories_empty_name)) }
+                }
+                state.saveFailed -> {
+                    { Text(stringResource(R.string.categories_save_failed)) }
+                }
+                else -> null
             },
-            isError = state.nameError,
+            isError = state.nameError || state.saveFailed,
             singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
@@ -107,14 +114,20 @@ fun CategoryManagerScreen(
                 .padding(horizontal = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            categoryPalette.forEach { color ->
+            categoryPalette.forEachIndexed { index, color ->
                 val selected = state.colorArgb == color
+                val colorLabel = stringResource(R.string.categories_pick_color, index + 1)
                 Box(
                     modifier = Modifier
                         .size(48.dp)
                         .clip(CircleShape)
                         .background(if (selected) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
-                        .clickable { onColorChange(color) },
+                        .clickable { onColorChange(color) }
+                        .semantics {
+                            role = Role.RadioButton
+                            this.selected = selected
+                            contentDescription = colorLabel
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Box(

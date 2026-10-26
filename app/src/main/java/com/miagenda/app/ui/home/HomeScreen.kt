@@ -48,6 +48,8 @@ import com.miagenda.app.ui.components.CategoryDot
 import com.miagenda.app.ui.components.EmptyState
 import com.miagenda.app.ui.habit.logLabelRes
 import com.miagenda.app.ui.components.RoundedCard
+import com.miagenda.app.ui.mascot.LocalMascot
+import com.miagenda.app.ui.mascot.MascotCard
 import com.miagenda.app.ui.theme.LocalMiAgendaColors
 import com.miagenda.app.ui.theme.MiAgendaTheme
 import com.miagenda.app.ui.theme.Violet
@@ -56,6 +58,8 @@ import com.miagenda.app.ui.theme.Violet
 fun HomeScreen(
     state: HomeUiState,
     onOpenCalendar: () -> Unit,
+    onOpenTimetable: () -> Unit,
+    onAddClass: () -> Unit,
     onOpenTasks: () -> Unit,
     onOpenHabits: () -> Unit,
     onOpenActivity: (AgendaItem) -> Unit,
@@ -90,6 +94,27 @@ fun HomeScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+        val mascot = LocalMascot.current
+        if (mascot.visible) {
+            MascotCard(stage = mascot.stage)
+        }
+        RoundedCard(modifier = Modifier.clickable(onClick = onOpenTimetable)) {
+            Column(modifier = Modifier.heightIn(min = 48.dp)) {
+                Text(
+                    text = stringResource(R.string.home_timetable_title),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = stringResource(R.string.home_timetable_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+                TextButton(onClick = onAddClass, modifier = Modifier.heightIn(min = 48.dp)) {
+                    Text(stringResource(R.string.timetable_add_class))
+                }
+            }
+        }
         if (HomeSection.NEXT_ACTIVITY in sections) {
             val next = state.nextItem
             if (next == null) {
@@ -100,7 +125,8 @@ fun HomeScreen(
                     containerColor = extra.hero,
                     contentColor = extra.heroContent,
                     messageColor = extra.heroMuted,
-                    iconTint = Violet
+                    iconTint = Violet,
+                    allowMascot = false
                 )
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -139,7 +165,8 @@ fun HomeScreen(
                 EmptyState(
                     title = stringResource(R.string.home_agenda_title),
                     message = stringResource(R.string.home_agenda_empty),
-                    icon = Icons.Rounded.CalendarMonth
+                    icon = Icons.Rounded.CalendarMonth,
+                    allowMascot = false
                 )
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -158,7 +185,8 @@ fun HomeScreen(
                 EmptyState(
                     title = stringResource(R.string.home_habits_title),
                     message = stringResource(R.string.home_habits_empty),
-                    icon = Icons.Rounded.Spa
+                    icon = Icons.Rounded.Spa,
+                    allowMascot = false
                 )
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -302,6 +330,8 @@ private fun HomeScreenPreview() {
                 preferencesRecovered = false
             ),
             onOpenCalendar = {},
+            onOpenTimetable = {},
+            onAddClass = {},
             onOpenTasks = {},
             onOpenHabits = {},
             onOpenActivity = { _ -> },

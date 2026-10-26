@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Event
+import androidx.compose.material.icons.rounded.School
 import androidx.compose.material.icons.rounded.Spa
 import androidx.compose.material.icons.rounded.TaskAlt
 import androidx.compose.material3.AlertDialog
@@ -62,6 +63,11 @@ fun AddKindSheet(
 @Composable
 private fun AddKindOptions(onPick: (String) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        AddOption(
+            label = stringResource(R.string.add_class),
+            icon = Icons.Rounded.School,
+            onClick = { onPick(EditorKind.CLASS) }
+        )
         AddOption(
             label = stringResource(R.string.add_activity),
             icon = Icons.Rounded.Event,
