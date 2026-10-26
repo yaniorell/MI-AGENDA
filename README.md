@@ -1,4 +1,4 @@
-# Mi Agenda
+# MI-AGENDA
 
 Agenda personal para el teléfono. Sirve para la universidad, los proyectos, los hábitos y el descanso. La versión de esta carpeta es **0.1.0** (`versionCode` 1). El identificador de la aplicación es `com.miagenda.app`.
 
