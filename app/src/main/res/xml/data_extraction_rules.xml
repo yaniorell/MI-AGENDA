@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <include
+            domain="file"
+            path="datastore/mi_agenda_preferences.preferences_pb" />
+        <include
+            domain="database"
+            path="mi_agenda.db" />
+        <include
+            domain="database"
+            path="mi_agenda.db-wal" />
+        <include
+            domain="database"
+            path="mi_agenda.db-shm" />
+    </cloud-backup>
+    <device-transfer>
+        <include
+            domain="file"
+            path="datastore/mi_agenda_preferences.preferences_pb" />
+        <include
+            domain="database"
+            path="mi_agenda.db" />
+        <include
+            domain="database"
+            path="mi_agenda.db-wal" />
+        <include
+            domain="database"
+            path="mi_agenda.db-shm" />
+    </device-transfer>
+</data-extraction-rules>

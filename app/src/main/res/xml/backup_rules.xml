@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <include
+        domain="file"
+        path="datastore/mi_agenda_preferences.preferences_pb" />
+    <include
+        domain="database"
+        path="mi_agenda.db" />
+    <include
+        domain="database"
+        path="mi_agenda.db-wal" />
+    <include
+        domain="database"
+        path="mi_agenda.db-shm" />
+</full-backup-content>
